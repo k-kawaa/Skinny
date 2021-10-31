@@ -1,15 +1,16 @@
 <?php
+
 /**
  *  Skinny  - One File Simple Template Engine over PHP -
- *  
+ *
  *  Skinnyは、実務レベルに耐え得る機能を持ち「シンプルであること」を
  *  コンセプトとした、１ファイルの高速テンプレートエンジンです。
- *  
- *  @Author     Junichi Sasaki (HandleName:Kuasuki) 
+ *
+ *  @Author     Junichi Sasaki (HandleName:Kuasuki)
  *  @Copyright  Junichi Sasaki
  *  @Version    0.4.4   2019/10/17
- *  
- *  
+ *
+ *
  *  2010/01/22  0.0.1   シンプルで設置しやすい１ファイルのTEとして作成。（echo/val/print/dval/if/else/def/elsedef/each)
  *                      出力タグは出来るだけ増やしたくないので、Web製作に必要な機能をサマライズして実装する
  *  2010/01/23          Skinnyと命名。（LatexyとかSexyにしようと思ったけど、テンプレート＝スキンなので）
@@ -41,14 +42,16 @@
  *  2019/06/26  0.4.2   replace タグを追加
  *  2019/07/17  0.4.3   orif/orifs/andif/andifs タグを追加
  *  2019/10/01  0.4.4   externalタグでnoticeが発生していた箇所の修正
- *  
+ *
  */
 
 $skConf = array();   // Skinny設定情報格納配列
 
-
-
 /**************************************  Skinny config  **************************************/
+
+define('SKINNY_PERMISSION_FOR_DIR', 0707);//初期値 0707
+define('SKINNY_PERMISSION_FOR_CACHE', 0707);//初期値 0707
+define('SKINNY_PERMISSION_FOR_ERRORLOG', 0606);//初期値 0606
 
 // 文字エンコード関連
 $skConf['ENCODE']['FLG']      = false;      // 自動文字エンコード変換の利用      [true]:する  false:しない
@@ -61,12 +64,12 @@ $skConf['TEMPLATE']['BASEDIR']= '';         // テンプレートを保存する
                                             // externalタグはここで指定した場所から相対で参照します
 
 // キャッシュ関連
-$skConf['CACHE']['FLG']       = false;      // スキンキャッシュの利用    [true]:する  false:しない
+$skConf['CACHE']['FLG']       = true;      // スキンキャッシュの利用    [true]:する  false:しない
 $skConf['CACHE']['DIR']       = './cache';  // キャッシュの生成先DIR （出来ればフルパスで。相対だとアチコチに作られるかも）
-$skConf['CACHE']['ALIVETIME'] = 3600;       // キャッシュの有効時間（秒）
+$skConf['CACHE']['ALIVETIME'] = 86400;       // キャッシュの有効時間（秒）
 
 // 画面表示関連
-$skConf['DISP']['ERRORS']     = true;       // エラーの画面出力      [true]:する   false:しない
+$skConf['DISP']['ERRORS']     = false;       // エラーの画面出力      [true]:する   false:しない
 $skConf['DISP']['BENCHMARK']  = false;      // ベンチマーク結果表示  [true]:する   false:しない
 
 // ログ関連
@@ -79,14 +82,14 @@ $skConf['PLUGIN']['DIR']      = './plugin'; // プラグインのPHPファイル
 
 // 出力時に余計な文字を削除するフィルタ設定
 $skConf['DISP']['COM_DELETE'] = 0;          // 出力時にHTMLコメント'<!-- ～ -->' を取り除く [0]:そのまま  1:取り除く
-$skConf['DISP']['TAB_DELETE'] = 0;          // 出力時にタブコード '\t' を取り除く           [0]:そのまま  1:取り除く
-$skConf['DISP']['RET_DELETE'] = 0;          // 出力時に連続した改行 '\n' を取り除く         [0]:そのまま  1:複数改行を1つにまとめる  2:改行を全て取り除く
+$skConf['DISP']['TAB_DELETE'] = 1;          // 出力時にタブコード '\t' を取り除く           [0]:そのまま  1:取り除く
+$skConf['DISP']['RET_DELETE'] = 1;          // 出力時に連続した改行 '\n' を取り除く         [0]:そのまま  1:複数改行を1つにまとめる  2:改行を全て取り除く
 
 // 基本設定
 $skConf['SKINNY']['OPENTAG']  = '<%';       // Skinnyのオープンタグ文字列  smartyっぽく'{'と'}'とか使うとCSSやJSの中を書き換える時に困るよ!!
 $skConf['SKINNY']['CLOSETAG'] = '%>';       // Skinnyのクローズタグ文字列  smartyっぽく'{'と'}'とか使うとCSSやJSの中を書き換える時に困るよ!!
-$skConf['SKINNY']['MAILAT']   = ' [AT] ';   // mail修飾子利用時に、'@'を置き換える文字(列)   default: [AT] 
-$skConf['SKINNY']['MAILDOT']  = ' [DOT] ';  // mail修飾子利用時に、'.'を置き換える文字(列)   default: [DOT] 
+$skConf['SKINNY']['MAILAT']   = ' [AT] ';   // mail修飾子利用時に、'@'を置き換える文字(列)   default: [AT]
+$skConf['SKINNY']['MAILDOT']  = ' [DOT] ';  // mail修飾子利用時に、'.'を置き換える文字(列)   default: [DOT]
 
 $skConf['EXTERNAL_CALLBACK'] = false;       // タグの置換を永久に行うか（externalの連続呼び出しが可能になりますが永久ループにご注意ください）
 
@@ -139,28 +142,17 @@ ini_set('default_charset', $skConf['ENCODE']['INTERNAL']);
 
 
 
-## ─────────────────────────────────────
-##                                                                           
-##             ///////  //        //                                         
-##           //        //   //       //////    //////    //    //            
-##          ////////  // ///    //  //    //  //    //  //    //             
-##               //  //// //   //  //    //  //    //    //////              
-##        ///////   //    //  //  //    //  //    //        //               
-##                                                    /////                  
-##        One File Simple Template Engine over PHP                           
-##                                                                           
-## ─────────────────────────────────────
 
 // キャッシュ利用時にキャッシュフォルダを自動生成する
 if($skConf['CACHE']['FLG'] && (!file_exists($skConf['CACHE']['DIR']) || (file_exists($skConf['CACHE']['DIR']) && !is_dir($skConf['CACHE']['DIR'])))) {
-	@mkdir( $skConf['CACHE']['DIR'] , 0777 );
-	@chmod( $skConf['CACHE']['DIR'] , 0777 );
+	@mkdir( $skConf['CACHE']['DIR'] , SKINNY_PERMISSION_FOR_DIR );
+	@chmod( $skConf['CACHE']['DIR'] , SKINNY_PERMISSION_FOR_DIR );
 }
 
 // エラーログ利用時にログフォルダを自動生成する
 if($skConf['ERRORLOG']['FLG'] && (!file_exists($skConf['ERRORLOG']['DIR']) || (file_exists($skConf['ERRORLOG']['DIR']) && !is_dir($skConf['ERRORLOG']['DIR'])))) {
-	@mkdir( $skConf['ERRORLOG']['DIR'] , 0777 );
-	@chmod( $skConf['ERRORLOG']['DIR'] , 0777 );
+	@mkdir( $skConf['ERRORLOG']['DIR'] , SKINNY_PERMISSION_FOR_DIR );
+	@chmod( $skConf['ERRORLOG']['DIR'] , SKINNY_PERMISSION_FOR_DIR );
 }
 
 
@@ -184,11 +176,9 @@ if($skConf['ERRORLOG']['FLG'] && (!file_exists($skConf['ERRORLOG']['DIR']) || (f
 
 /**
  *  Skinny class
- *  
  *  @package  net.sx68.skinny
  *  @access   public
  *  @author   Kuasuki  <kuasuki@sx68.net>
- *  
  */
 class Skinny {
 
@@ -207,13 +197,10 @@ class Skinny {
 
 	function __construct() {
 		clearStatCache();
-		
 		global $skLoopCount;						// スキン展開用配列
-		$this->skLoopCount = $skLoopCount;			// 
-		
+		$this->skLoopCount = $skLoopCount;			//
 		global $skConf;								// コンフィグ情報保持
-		$this->skConf = $skConf;					// 
-		
+		$this->skConf = $skConf;					//
 		$this->_skStartTime = _get_microtime();		// ベンチ用に時間を取得
 	}
 
@@ -239,7 +226,7 @@ class Skinny {
 				$error_message = date('Y-m-d H:i:s') . "\t" . $str . "\n";
 				$error_logfile = $this->skConf['ERRORLOG']['DIR'] . "/errorlog_" . date('Ymd') . ".log";
 				error_log( $error_message, 3, $error_logfile );
-				chmod( $error_logfile, 0666 );
+				chmod( $error_logfile, SKINNY_PERMISSION_FOR_ERRORLOG );
 				return true;
 			}
 		}
@@ -277,9 +264,7 @@ class Skinny {
 	 *  タグ別のパース処理
 	 */
 	public function _sfParseSkin( $str, $type = null ){
-		
 		$str = trim( $str[1] );
-		
 		if ( substr( $str, 0, 1) == '/' ) {
 			/* '/'で始まるタグは無条件で終了タグ（PHPの閉じ括弧）とみなす (v0.4.0以降) */
 			return $this->_skTags_close();
@@ -289,11 +274,9 @@ class Skinny {
 			/* タグとパラメータの分離 */
 			@list( $com, $prm ) = explode( '(', $str );
 		}
-		
 		$com = trim( strtolower( $com ) );      // チェック用に小文字で統一
 		list( $prm, ) = explode( ')', $prm );   // パラメータ部取り出し
 		$prm = $this->_sfTagValueTrims( $prm ); // パラメータ内の不要な空白除去
-		
 		// 分岐
 		//   $funcname = '_skTags_'.$com;
 		//   return $funcname($prm);
@@ -301,51 +284,36 @@ class Skinny {
 		switch ( $com ) {
 			case '%':			/*  <%% (hogehoge) %%> と <% echo(hogehoge) %> この書式は同じです (v0.4.0以降) */
 			case 'echo':		return $this->_skTags_echo( $prm );		break;
-			
 			case 'dval':		return $this->_skTags_dval( $prm );		break;
 			case 'each':		return $this->_skTags_each( $prm );		break;
 			case 'for':			return $this->_skTags_for( $prm );		break;
-			
 			case 'keach':		return $this->_skTags_keach( $prm );	break;
 			case 'kecho':		return $this->_skTags_kecho( $prm );	break;
-			
 			case 'if':			return $this->_skTags_if( $prm );		break;
 			case 'elseif':		return $this->_skTags_elseif( $prm );	break;
-			
 			case 'ifs':			return $this->_skTags_ifs( $prm );		break;
 			case 'elseifs':		return $this->_skTags_elseifs( $prm );	break;
-			
 			case 'andif':		return $this->_skTags_andif( $prm );	break;
 			case 'andifs':		return $this->_skTags_andifs( $prm );	break;
-			
 			case 'orif':		return $this->_skTags_orif( $prm );		break;
 			case 'orifs':		return $this->_skTags_orifs( $prm );	break;
-			
 			case 'def':
 			case 'ifdef':
 			case 'defined':		return $this->_skTags_def( $prm );		break;
-			
 			case 'even':
 			case 'ifeven':		return $this->_skTags_ifeven( $prm );	break;
-			
 			case 'var' :
 			case 'variable' :	return $this->_skTags_var( $prm );		break;
-			
 			case 'calc':
 			case 'vcalc':
 			case 'varcalc':		return $this->_skTags_calc( $prm );		break;
-			
 			case 'replace':		return $this->_skTags_replace( $prm );	break;
-			
 			case 'plg':
 			case 'plugin':		return $this->_skTags_plugin( $prm );	break;
-			
 			case 'elseeven':	//これは将来的に仕様が変わるか無くすかも
 			case 'elsedef':		//これは将来的に仕様が変わるかも
 			case 'else':		return $this->_skTags_else();			break;
-			
 			case 'external':	if ( $this->skConf['EXTERNAL_CALLBACK'] ) return $this->_skTags_external( $prm );	break;
-			
 			case '/each':
 			case '/for':
 			case '/keach':
@@ -365,11 +333,9 @@ class Skinny {
 			case 'vcopy':
 			case 'varcopy':		return $this->_skTags_varcopy( $prm );	break;
 */
-			
 			default:
 					// $this->_skErrorLog( "Undefined tag was used. [{$com}]" );
 					return '';		// コメント扱い
-			
 		}
 	}
 
@@ -469,7 +435,6 @@ class Skinny {
 		$src_c = '';
 		$src_a = array();
 		$ope   = " OR ";
-		
 		$val_split = explode( '|', $tag );
 		foreach ( $val_split as $t ) {
 			list( $variable, $comp, $str ) = explode( ',' , trim($t) );
@@ -491,7 +456,6 @@ class Skinny {
 		$src_c = '';
 		$src_a = array();
 		$ope   = " AND ";
-		
 		$val_split = explode( '|', $tag );
 		foreach ( $val_split as $t ) {
 			list( $variable, $comp, $str ) = explode( ',' , trim($t) );
@@ -512,7 +476,6 @@ class Skinny {
 		$src_c = '';
 		$src_a = array();
 		$ope   = " OR ";
-		
 		$val_split = explode( '|', $tag );
 		foreach ( $val_split as $t ) {
 			list( $variable, $comp, $variable2 ) = explode( ',' , trim($t) );
@@ -536,7 +499,6 @@ class Skinny {
 		$src_c = '';
 		$src_a = array();
 		$ope   = " AND ";
-		
 		$val_split = explode( '|', $tag );
 		foreach ( $val_split as $t ) {
 			list( $variable, $comp, $variable2 ) = explode( ',' , trim($t) );
@@ -557,12 +519,10 @@ class Skinny {
 	 */
 	function _skTags_replace( $tag ) {
 		list($newvar, $pattern, $replaced, $variable ) = explode( ',' , $tag );
-		
 		$newvar   = trim($newvar);
 		$variable = trim($variable);
 		$pattern  = trim($pattern);
 		$replaced = trim($replaced);
-		
 		// ここに置換後を戻す
 		$newvar_name = $this->_skTags_LoopCounter( explode('/',$newvar) );
 		// パターン
@@ -583,7 +543,6 @@ class Skinny {
 		}else{
 			$variable_name = $variable;
 		}
-		
 		$src = "<?php $newvar_name = str_replace( $pattern_name, $replaced_name, $variable_name ); ?>";
 		return $src;
 	}
@@ -645,11 +604,9 @@ class Skinny {
 	 *  ex) each(list) ⇒ list0～nn までを繰り返す。 echo(list/xxxx) でカラム単位にアクセス可能となる
 	 */
 	private function _skTags_each( $tag ) {
-		
 		$vals = explode('/',$tag);
 		$vals_loop = '';
 		$variable_name = '$skOutput';
-		
 		$cnt = 0;
 		$cnt_join = count($vals) - 1;
 		foreach ($vals as $val) {
@@ -657,7 +614,6 @@ class Skinny {
 			if( isset($this->skLoopCount["$vals_loop"])===false ){
 				$this->skLoopCount["$vals_loop"]=0;
 			}
-			
 			if($cnt < $cnt_join ) {
 				$variable_name.="['".$val."'][\$skLoopCount['$vals_loop']]";
 			} else {
@@ -665,7 +621,6 @@ class Skinny {
 			}
 			$cnt++;
 		}
-		
 		$chk_value = '$skLoopCount["'.$vals_loop.'"]';
 		$src = "<?php if( !isset(".$chk_value.") ){ ".$chk_value."=0; } \n";
 		$src.= " if(!isset($variable_name)){ $variable_name=array(); } \n";
@@ -684,7 +639,6 @@ class Skinny {
 	 */
 	private function _skTags_keach( $tag ) {
 		$vals = explode( '/', $tag );
-		
 		$val_list = '';
 		$variable_name = '$skOutput';
 		$valiable_k_name = '$skOutput[\'KEY\']';
@@ -710,7 +664,6 @@ class Skinny {
 	private function _skTags_kecho( $tag ) {
 		$valiable_k_name = '$skOutput[\'KEY\']';
 		$valiable_v_name = '$skOutput[\'VAL\']';
-		
 		if ( strpos( $tag, '|' ) ) {
 			$par = explode( '|', $tag );
 			$command = strtolower( $par[0] );
@@ -731,7 +684,6 @@ class Skinny {
 				return '<?php echo ' . $valiable_v_name . ';?>';
 			}
 		}
-		
 	}
 
 
@@ -782,51 +734,39 @@ class Skinny {
 			case 'toupper':
 			case 'strtoupper':
 				return "strtoupper($string)";
-				
 			case 'lower':
 			case 'tolower':
 			case 'strtolower':
 				return "strtolower($string)";
-				
 			case 'strip':
 			case 'strip_tags':
 				return "strip_tags($string)";
-				
 			case 'br':
 			case 'nl2br':
 				return "nl2br($string)";
-				
 			case 'html':
 			case 'htmlspecialchars':
 				return "htmlspecialchars($string,ENT_QUOTES,'$char_set')";
-				
 			case 'htmlall':
 			case 'htmlentities':
 				return "htmlentities($string,ENT_QUOTES,'$char_set')";
-				
 			case 'url':
 			case 'urlencode':
 				return "rawurlencode($string)";
-				
 			case 'urld':
 			case 'urldecode':
 				return "urldecode($string)";
-				
 			case 'rurl':
 			case 'rawurlencode':
 				return "rawurlencode($string)";
-				
 			case 'rurld':
 			case 'rawurldecode':
 				return "rawurldecode($string)";
-				
 			case 'urlpathinfo':
 				return "str_replace('%2F','/',rawurlencode($string))";
-				
 			case 'quotes':
 				// escape unescaped single quotes
 				return "preg_replace(\"%(?<!\\\\\\\\)'%\", \"\\\\'\", $string)";
-				
 			case 'hex':
 				// escape every character into hex
 				/* 実装予定無し
@@ -838,7 +778,6 @@ class Skinny {
 				*/
 				$this->_skErrorLog( "Undefined escape modifier was used. [{$esc_type}]" );
 				return $string;
-				
 			case 'hexentity':
 				/* 実装予定無し
 				$return = '';
@@ -849,7 +788,6 @@ class Skinny {
 				*/
 				$this->_skErrorLog( "Undefined escape modifier was used. [{$esc_type}]" );
 				return $string;
-				
 			case 'decentity':
 				/* 実装予定無し
 				$return = '';
@@ -860,18 +798,15 @@ class Skinny {
 				*/
 				$this->_skErrorLog( "Undefined escape modifier was used. [{$esc_type}]" );
 				return $string;
-				
 			case 'javascript':
 				// escape quotes and backslashes, newlines, etc.
 				return "strtr($string, array('\\'=>'\\\\',\"'\"=>\"\\'\",'\"'=>'\\\"',\"\r\"=>'\\r',\"\n\"=>'\\n','</'=>'<\/'))";
-				
 			case 'mail':
 				/* 使った事無いんだけど要るこれ？ｗ */
 				// safe way to display e-mail address on a web page
 				$at = $this->skConf['SKINNY']['MAILAT'];
 				$dot= $this->skConf['SKINNY']['MAILDOT'];
 				return "str_replace(array('@', '.'),array('{$at}', '{$dot}'), $string)";
-				
 			case 'nonstd':
 				// escape non-standard chars, such as ms document quotes
 				/* 実装予定無し
@@ -889,33 +824,24 @@ class Skinny {
 				*/
 				$this->_skErrorLog( "Undefined escape modifier was used. [{$esc_type}]" );
 				return $string;
-				
-				
 			/** ここからSkinny独自のエスケープ */
-				
 			case 'nbsp':
 			case 'space':
 				return "str_replace(' ', '&nbsp;', $string)";
-				
 			case 'number':
 			case 'number_format':
 				return "number_format($string)";
-				
 			case 'ahref':
 			case 'link':
 				return 'preg_replace(\'/(https?)(:\\/\\/[-_.!~*\\\'()a-zA-Z0-9;\\/?:\\@&=+\\$,%#]+)/\', \'<a href="\\\\1\\\\2">\\\\1\\\\2</a>\','.$string.')';
 				//return 'ereg_replace("http://[^<>[:space:]]+[[:alnum:]/]",\'<a href="\\0">\\0</a>\','.$string.')';
-				
 			case 'rquote':
 				// form input value escape
 				return "str_replace('\"', '&quot;', $string)";
-				
 			case 'strrev':
 			case 'reverse':
 				return "_skGlobal_mb_strrev($string)";
-				
 			default:
-				
 				/**
 				 * 半角文字を1、全角文字を2として文字数カットを行う
 				 * width[s,n]   s文字目からn長で切り出す
@@ -923,8 +849,6 @@ class Skinny {
 				if ( preg_match("/^width\[([0-9]+),([0-9]+)\]$/",$esc_type,$mc) ) {
 					return "strlen($string)<={$mc[1]} ? $string : mb_strimwidth($string,{$mc[1]},{$mc[2]})";
 				}
-				
-				
 				/**
 				 * 文字単位で文字列カットを行う
 				 * substr[s,n]   s:0以上の数値
@@ -932,8 +856,6 @@ class Skinny {
 				if ( preg_match("/^substr\[([-,0-9]+)\]$/",$esc_type,$mc) ) {
 					return "mb_substr($string,{$mc[1]})";
 				}
-				
-				
 				/**
 				 * バイト単位で文字列カットを行う
 				 * strcut[s,n]   n:0以上の数値
@@ -941,8 +863,6 @@ class Skinny {
 				if ( preg_match("/^strcut\[([-,0-9]+)\]$/",$esc_type,$mc) ) {
 					return "mb_strcut($string,{$mc[1]})";
 				}
-				
-				
 				/**
 				 * 文字のカナ変換を行う
 				 * kana['option']
@@ -951,8 +871,6 @@ class Skinny {
 				if ( preg_match("/^kana\[(.+)\]$/",$esc_type,$mc) ) {
 					return "mb_convert_kana({$string},{$mc[1]})";
 				}
-				
-				
 				/**
 				 * 日付形式を変換する
 				 * date['format'] : date(format,$date) と同義（unixtimestamp以外に strtotimeが通るもの全てが対象）
@@ -961,8 +879,6 @@ class Skinny {
 				if ( preg_match("/^date\[(.+)\]$/",$esc_type,$mc) ) {
 					return "date({$mc[1]},((is_numeric($string))?$string:strtotime($string)))";
 				}
-				
-				
 				/**
 				 * 日付形式（or UNIXTIME）から日本語の曜日へ変換する
 				 * week : 日～土の全角文字に変換する
@@ -971,9 +887,7 @@ class Skinny {
 				if ( preg_match("/^week$/",$esc_type,$mc) ) {
 					return "_skGlobal_mb_weekjp($string)";
 				}
-				
 				return $string;
-				
 		}
 	}
 
@@ -1031,7 +945,6 @@ class Skinny {
 		$tags = trim($tags," \t\"'" );
 		$_var = trim($_var," \t\"'" );
 		@ob_end_clean();
-		
 # BASEDIRが設定されているかどうかは判定から外す！
 #		if ( $this->skConf['TEMPLATE']['BASEDIR']!="" && strtolower(trim($_var))!="false" ) {
 		if ( strtolower(trim($_var)) == "false" ) {
@@ -1039,7 +952,6 @@ class Skinny {
 		} else {
 			$template_path = sprintf("%s/%s", rtrim($this->skConf['TEMPLATE']['BASEDIR'],'/'), ltrim($tags,'/') );
 		}
-		
 		if ( is_file($template_path) ) {
 			return file_get_contents( $template_path );
 		}
@@ -1056,7 +968,6 @@ class Skinny {
 		if ( $this->skConf['PLUGIN']['FLG'] ) {
 			list( $plugin_name , $vars ) = explode( ',' , $tag, 2 );
 			$plugin_name = trim($plugin_name," \t\n\"'");  // 空白とクォートを削除
-			
 			$variables = explode( ',', $vars );
 			$arguments = '';
 			foreach ( $variables as $v ) {
@@ -1110,39 +1021,32 @@ class Skinny {
 	 *  キャッシュの期間有効性チェック
 	 */
 	private function _skCheckTTLCheck( $cache_name = null ) {
-		
 		// 時間が0以下は作り直し
 		if ( $this->skConf['CACHE']['ALIVETIME'] <= 0 ) {
 			return false;
 		}
-		
 		// キャッシュファイルが無い場合は作り直し
 		if ( !is_file($cache_name) ) {
 			return false;
 		}
-		
 		// キャッシュファイル作成時が取得出来ない場合は作り直し
 		$cftime = filemtime( $cache_name );
 		if ( !$cftime ) {
 			return false;
 		}
-		
 		// オリジナルファイル作成時が取得出来ない場合は作り直し
 		$oftime = filemtime( $this->skinFile );
 		if ( !$oftime ) {
 			return false;
 		}
-		
 		// キャッシュファイルよりもスキンが新しければ作り直し
 		if ( $cftime < $oftime ) {
 			return false;
 		}
-		
 		// キャッシュ有効時刻を過ぎていたら作り直し
 		if ( time() > ($this->skConf['CACHE']['ALIVETIME'] + $cftime) ) {
 			return false;
 		}
-		
 		// 有効なキャッシュ
 		return true;
 	}
@@ -1158,15 +1062,12 @@ class Skinny {
 	/**
 	 *  Skinnyでスキン内のタグをPHPに置換したコードを返す
 	 *  ※）キャッシュ機能ONで、キャッシュがあればそれを使う
-	 *  
 	 *  @param tpl      string   スキンファイル
 	 *  @param param    array    スキンに展開する変数（配列）
 	 *  @param tplcode  string   スキン内容コード（指定された場合はtplより優先で使用）
 	 */
 	private function _skReplacedCode( $tpl = null, $param = null, $tplcode = null ) {
-		
 		$this->skinFile = $tpl;
-		
 		if ( is_null( $tplcode ) ) {
 			if ( !is_file($tpl) ) {
 				$this->_skErrorLog( "Can not open template file. [{$tpl}]" );
@@ -1188,7 +1089,6 @@ class Skinny {
 		} else {
 			$html = $tplcode;
 		}
-		
 		// 外部テンプレートからさらに外部テンプレートを差し込む処理を許可するかどうか
 		if ( $this->skConf['EXTERNAL_CALLBACK'] ) {
 			// Skinnyタグ変換
@@ -1203,7 +1103,6 @@ class Skinny {
 			$code  = '<?php $skOutput = $param; ?>';
 			$code .= preg_replace_callback( '/'.$this->skConf['SKINNY']['OPENTAG'].'(.+?)'.$this->skConf['SKINNY']['CLOSETAG'].'/' , '_callback_parse_skin' , $html );
 		}
-		
 		// コメント削除
 		if ( $this->skConf['DISP']['COM_DELETE'] == 1 ) {
 			$code = preg_replace( "/<!--.*?-->/s", '', $code );
@@ -1218,18 +1117,16 @@ class Skinny {
 		}elseif ( $this->skConf['DISP']['RET_DELETE'] == 2 ) {
 			$code = str_replace( "\n", "", $code );
 		}
-		
 		// 文字コード変換
 		if ( $this->skConf['ENCODE']['FLG'] && ($this->skConf['ENCODE']['INTERNAL'] != $this->skConf['ENCODE']['TEMPLATE']) ) {
 			$code = mb_convert_encoding( $code, $this->skConf['ENCODE']['INTERNAL'], $this->skConf['ENCODE']['TEMPLATE'] );
 		}
-		
 		// キャッシュ機能ONならキャッシュとして残す
 		if ( $this->skConf['CACHE']['FLG'] ) {
 			if ( file_put_contents( $cache_name, $code ) === false ) {
 				$this->_skErrorLog( "The cache was not able to write in file. [{$cache_name}]" );
 			} else {
-				chmod( $cache_name, 0777 );
+				chmod( $cache_name, SKINNY_PERMISSION_FOR_CACHE );
 			}
 		}
 		return $code;
@@ -1238,7 +1135,6 @@ class Skinny {
 
 	/**
 	 *  Skinnyでスキン内のタグをPHPに置換し、実行後のHTMLを表示する
-	 *  
 	 *  @param tpl      string   スキンファイル
 	 *  @param param    array    スキンに展開する変数（配列）
 	 *  @param tplcode  string   スキン内容コード（指定された場合はtplより優先で使用）
@@ -1255,20 +1151,17 @@ class Skinny {
 			# $html .= $this->skConf['ENCODE']['INTERNAL']. " -> " . $this->skConf['ENCODE']['EXTERNAL']. "<BR />";
 			# header("Content-Type: text/html; charset:".$this->skConf['ENCODE']['EXTERNAL']);
 		}
-		
 		/*
 		if ( $this->skConf['SKINNY']['AUTOEXEC'] ) {
 			_autoPrependFuncion();
 		}
 		*/
-		
 		echo $html . $this->_skBenchMarkTime();
 	}
 
 
 	/**
 	 *  Skinnyでスキン内のタグをPHPに置換し、実行後のHTMLを返す
-	 *  
 	 *  @param tpl      string   スキンファイル
 	 *  @param param    array    スキンに展開する変数（配列）
 	 *  @param tplcode  string   スキン内容コード（指定された場合はtplより優先で使用）
@@ -1289,7 +1182,6 @@ class Skinny {
 
 	/**
 	 *  Skinnyでスキン内のタグをPHPに置換したコードを返す
-	 *  
 	 *  @param tpl      string   スキンファイル
 	 *  @param param    array    スキンに展開する変数（配列）
 	 *  @param tplcode  string   スキン内容コード（指定された場合はtplより優先で使用）
@@ -1362,7 +1254,6 @@ if ( $skConf['SKINNY']['AUTOEXEC'] ) {
 
 
 // 自動実行時、SkinnyDisplay前に行いたい処理を記述
-// 
 function _autoPrependFuncion(){
 	// require_once( "SkinnyDefine.php" );
 	// return $_skDefine;
