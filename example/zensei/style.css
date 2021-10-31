@@ -1,0 +1,27 @@
+body { background:#111; color:#eee; }
+th {text-align:center; padding:.5em;}
+td {text-align:center; padding:.5em;}
+table{ background:#ddd; border:none;}
+input[type="text"] { padding:0.3em; background:#333; color:#eee;}
+.ttl { color:#c3b4fa; }
+.answer { background:#111; padding:1em; line-height:200%; border:1px solid #c3b4fa; border-radius: 6px; }
+.name   { color:#aaa; font-weight:bold; }
+.zensei { color:#00f; font-weight:bold; }
+.raisei { color:#a0a; font-weight:bold; }
+.syugo  { color:#660; font-weight:bold; }
+.error  { color:#e00; }
+.debug  {font-size:0.8em; }
+table { border-top :1px solid #a998e7; border-left:1px solid #a998e7; border-spacing:0; border-collapse:collapse;}
+table th { background:#1e1834; color:#d9d1f8; }
+table td { background:#111; color:#ddd; }
+hr { margin-top:5em; border:none; }
+.bold   { font-weight: bold; }
+.gray   { color: #888888; }
+.red    { color: #FF4466; }
+.yellow { color: #EEEE44; }
+.green  { color: #00FF44; }
+.cyan   { color: #44DDFF; }
+.pink   { color: #FBBDF1; }
+.blue   { color: #5B95E1; }
+.orange { color: #FFA62D; }
+.white  { color: #FFFFFF; }

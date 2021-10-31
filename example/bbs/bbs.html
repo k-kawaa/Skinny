@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>簡単な１行掲示板 [Skinny Sample]</title>
+<style>
+<% external("style.css") %>
+input[type="text"]  {padding:.5em; margin:.5em;}
+input[type="submit"]{padding:.5em 2em; margin:.5em;}
+.user{ background:#111; color:#eae; font-size:.8em; border-radius:.5em; padding:.3em .8em; box-shadow:0px 0px 4px #d6f; margin-left:1em;}
+.date{ color:#c3b4fa; font-size:.5em; }
+.mess{ color:#ddd; position:relative; top:.2em; }
+.log { font-size:1em; margin:bottom:1em; border-bottom:1px dotted #5b4f89; padding:.3em; padding-bottom:1em;}
+.sent { color:#555; font-size:.8em; padding:1em; border:1px solid #ddd;}
+form {margin-top:1em; }
+.error {color:#e00;}
+</style>
+</head>
+<body>
+
+<h4 class="ttl">簡単な１行掲示板サンプル</h5>
+<div class="answer">
+	面倒なんでページング入れてません。サニタイズとかも全然考慮してません。<br />
+	ログは最新の<% echo(lognum|html) %>件だけ表示してます。大昔のチャットみたいなもんです。
+</div>
+<br />
+
+
+<% def(bbsline) %>
+<% each(bbsline) %>
+<!-- <% echo(bbsline/name|html) %>さんの発言 -->
+<div class="log">
+  <span class="date"><% dval(bbsline/date,'Y-m-d H:i:s') %></span><br />
+  <span class="mess"><% echo(bbsline/message|html) %></span>
+  <span class="user"><% echo(bbsline/name|html) %></span>
+</div>
+<% /each %>
+<% elsedef %>
+<span class="error">書込みデータがありません</span>
+<% /def %>
+
+<form name="form1" action="bbs.php" method="post">
+  名前 <input type="text" name="name" value=""><br />
+  内容 <input type="text" name="body" size="60" value=""><br />
+  <input type="hidden" name="retphp" value="bbs.php">
+  <input type="hidden" name="mode" value="writeMode" />
+  　　 <input type="submit" name="write" value="書き込み">
+</form>
+
+</body>
+</html>

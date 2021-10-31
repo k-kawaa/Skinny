@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>簡単なカレンダー [Skinny Sample]</title>
+<style>
+<% external("../bbs/style.css") %>
+th {text-align:center; padding:1em;}
+td {text-align:center; padding:1em;}
+table{ box-shadow:0 0 .8em #84e; }
+table caption span {font-size:1.5em;}
+<% def(commentOut) %>
+th.sun {color:#f00; background:#fcc;}
+th.sat {color:#00f; background:#ccf;}
+th.wek {color:#444; background:#eee;}
+td.sun {color:#f40; background:#fff;}
+td.sat {color:#04f; background:#fff;}
+td.wek {color:#444; background:#fff;}
+<% /def %>
+</style>
+</head>
+<body>
+
+<% def(weekList) %>
+<table>
+  <caption><a href="?ym=<% echo(bef|url) %>"><% echo(befM|html) %>月</a>　　　<span><% echo(year|html) %>年<% echo(month|html) %>月</span>　　　<a href="?ym=<% echo(aft|url) %>"><% echo(aftM|html) %>月</a></caption>
+  <tr>
+    <th class="red">日</th>
+    <th class="wek">月</th>
+    <th class="wek">火</th>
+    <th class="wek">水</th>
+    <th class="wek">木</th>
+    <th class="wek">金</th>
+    <th class="cyan">土</th>
+  </tr>
+  <% each(weekList) %>
+  <tr>
+    <td class=red><% echo(weekList/sun|html) %></td>
+    <td class=wek><% echo(weekList/mon|html) %></td>
+    <td class=wek><% echo(weekList/tue|html) %></td>
+    <td class=wek><% echo(weekList/wed|html) %></td>
+    <td class=wek><% echo(weekList/thu|html) %></td>
+    <td class=wek><% echo(weekList/fri|html) %></td>
+    <td class=cyan><% echo(weekList/sat|html) %></td>
+  </tr>
+  <% /each %>
+</table>
+<% elsedef %>
+  何かのエラーでカレンダー情報が取得出来ませんでした…
+<% /def %>
+
+</body>
+</html>

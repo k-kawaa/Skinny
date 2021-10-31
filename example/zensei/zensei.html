@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>アナタのシラナイ前世 [Skinny Sample]</title>
+<style>
+<% external("style.css") %>
+</style>
+</head>
+
+<body onLoad="document.form1.name.focus()">
+
+	<span class="ttl">あなたの前世と来世が分かります。<br />ご自身の名前を入れてください。<br /></span>
+	<form action="#" method="POST" name="form1">
+		<input type="text" maxlength="50" title="半角50文字／全角25文字まで" name="name" value="<% echo(name|rquote) %>">
+		<input type="submit" value="前世を確認・・・">
+	</form>
+
+	<br />
+
+<% if(checked,==,true) %>
+	<div class="answer">
+		<% if(error,==,true) %>
+			<span class="red"><% echo(errorMessage|html) %></span>
+		<% else %>
+			<span class="cyan"><% echo(name|html) %></span>さんの前世と来世が見えました…<br />
+			あなたの前世は<span class="yellow"><% echo(zenkei|html) %><% echo(zenmei|html) %></span>でした。<br />
+			来世<% ifs(zenmei,==,raimei) %>も<% else %>は<% /if %><span class="pink"><% echo(raikei|html) %><% echo(raimei|html) %></span>です。<br />
+			あなたは<span class="orange"><% echo(syukei|html) %><% echo(syumei|html) %></span>の守護霊に守られています。<br />
+		<% /if %>
+	</div>
+<% /if %>
+	
+	<hr />
+	
+<% if(error,!=,true) %>
+	<div class="debug">
+		<table border=1>
+		  <tr><th colspan="2">実験用デバッグ</th></tr>
+		  <tr><td>NameHash</td><td><% echo(hash) %></td></tr>
+		  <tr><td>前形_num</td><td><% echo(zenkei_num) %></td></tr>
+		  <tr><td>前名_num</td><td><% echo(zenmei_num) %></td></tr>
+		  <tr><td>来形_num</td><td><% echo(raikei_num) %></td></tr>
+		  <tr><td>来名_num</td><td><% echo(raimei_num) %></td></tr>
+		  <tr><td>守形_num</td><td><% echo(syukei_num) %></td></tr>
+		  <tr><td>守名_num</td><td><% echo(syumei_num) %></td></tr>
+		  <tr><td>形RecNum</td><td><% echo(DB1num) %></td></tr>
+		  <tr><td>名RecNum</td><td><% echo(DB2num) %></td></tr>
+		</table>
+	</div>
+<% /if %>
+
+</body>
+</html>
